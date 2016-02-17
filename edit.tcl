@@ -65,4 +65,7 @@ proc ::gpgedit::main {argv0 argv} {
     edit [lindex $argv 0] $editor
 }
 
-::gpgedit::main $argv0 $argv
+# If this is the main script...
+if {[info exists argv0] && ([file tail [info script]] eq [file tail $argv0])} {
+    ::gpgedit::main $argv0 $argv
+}
