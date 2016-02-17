@@ -1,13 +1,25 @@
 #!/usr/bin/env tclsh
-package require Tcl 8.5
+package require Tcl 8.6
 package require cmdline
 package require fileutil
 
-set GPG2_PATH gpg2
+namespace eval ::gpgedit {
+    variable gpgPath gpg2
+    variable commandPrefix [list -ignorestderr -- \
+            $gpgPath --batch --yes --passphrase-fd 0]
+}
 
-proc edit {encrypted editor} {
-    set commandPrefix [list -ignorestderr -- \
-            $::GPG2_PATH --batch --yes --passphrase-fd 0]
+proc ::gpgedit::decrypt {in out passphrase} {
+    variable commandPrefix
+    exec {*}$commandPrefix --decrypt -o $out $in << $passphrase
+}
+
+proc ::gpgedit::encrypt {in out passphrase} {
+    variable commandPrefix
+    exec {*}$commandPrefix --symmetric --armor -o $out $in << $passphrase
+}
+
+proc ::gpgedit::edit {encrypted editor} {
     puts Passphrase:
 
     if {$::tcl_platform(platform) eq {unix}} {
@@ -20,16 +32,17 @@ proc edit {encrypted editor} {
     }
 
     set temporary [::fileutil::tempfile]
-    file attributes $temporary -permissions 0600
-    exec {*}$commandPrefix --decrypt -o $temporary $encrypted \
-            << $passphrase
-    exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
-    exec {*}$commandPrefix --symmetric --armor -o $encrypted $temporary \
-            << $passphrase
-    file delete $temporary
+    try {
+        file attributes $temporary -permissions 0600
+        decrypt $encrypted $temporary $passphrase
+        exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
+        encrypt $temporary $encrypted $passphrase
+    } finally {
+        file delete $temporary
+    }
 }
 
-proc main {argv0 argv} {
+proc ::gpgedit::main {argv0 argv} {
     set options {
         {editor.arg  {}  {editor to use}}
     }
@@ -43,4 +56,4 @@ proc main {argv0 argv} {
     edit [lindex $argv 0] $editor
 }
 
-main $argv0 $argv
+::gpgedit::main $argv0 $argv
