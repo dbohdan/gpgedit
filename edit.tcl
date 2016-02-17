@@ -52,7 +52,7 @@ proc ::gpgedit::main {argv0 argv} {
     set opts [::cmdline::getoptions argv $options $usage]
 
     set editor $::env(EDITOR)
-    if {[dict exists $opts editor]} {
+    if {[dict get $opts editor] ne {}} {
         set editor [dict get $opts editor]
     }
     edit [lindex $argv 0] $editor
