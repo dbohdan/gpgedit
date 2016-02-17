@@ -32,7 +32,14 @@ proc ::gpgedit::edit {encrypted editor} {
     }
 
     try {
-        set temporary [::fileutil::tempfile]
+        if {[file extension $encrypted] in {.asc .gpg}} {
+            set rootname [file rootname $encrypted]
+        } else {
+            set rootname $encrypted
+        }
+        set extension [file extension $rootname]
+        close [file tempfile temporary $extension]
+
         file attributes $temporary -permissions 0600
         if {[file exists $encrypted]} {
             decrypt $encrypted $temporary $passphrase
