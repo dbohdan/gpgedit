@@ -31,10 +31,12 @@ proc ::gpgedit::edit {encrypted editor} {
         exec stty {*}$oldMode <@ stdin
     }
 
-    set temporary [::fileutil::tempfile]
     try {
+        set temporary [::fileutil::tempfile]
         file attributes $temporary -permissions 0600
-        decrypt $encrypted $temporary $passphrase
+        if {[file exists $encrypted]} {
+            decrypt $encrypted $temporary $passphrase
+        }
         exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
         encrypt $temporary $encrypted $passphrase
     } finally {
