@@ -19,7 +19,7 @@ proc ::gpgedit::encrypt {in out passphrase} {
     exec {*}$commandPrefix --symmetric --armor -o $out $in << $passphrase
 }
 
-proc ::gpgedit::edit {encrypted editor} {
+proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
     puts Passphrase:
 
     if {$::tcl_platform(platform) eq {unix}} {
@@ -45,7 +45,9 @@ proc ::gpgedit::edit {encrypted editor} {
             decrypt $encrypted $temporary $passphrase
         }
         exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
-        encrypt $temporary $encrypted $passphrase
+        if {!$readOnly} {
+            encrypt $temporary $encrypted $passphrase
+        }
     } finally {
         file delete $temporary
     }
@@ -54,19 +56,21 @@ proc ::gpgedit::edit {encrypted editor} {
 proc ::gpgedit::main {argv0 argv} {
     set options {
         {editor.arg  {}  {editor to use}}
+        {ro              {read-only mode -- all changes will be lost}}
     }
     set usage "$argv0 \[options] filename ...\noptions:"
     if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] \
-            || ([lindex $argv 0] eq {})} {
+            || ([set filename [lindex $argv 0]] eq {})} {
         puts -nonewline [::cmdline::usage $options $usage]
         exit 1
     }
 
-    set editor $::env(EDITOR)
     if {[dict get $opts editor] ne {}} {
         set editor [dict get $opts editor]
+    } else {
+        set editor $::env(EDITOR)
     }
-    edit [lindex $argv 0] $editor
+    edit $filename $editor [dict get $opts ro]
 }
 
 # If this is the main script...
