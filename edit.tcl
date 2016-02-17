@@ -56,7 +56,11 @@ proc ::gpgedit::main {argv0 argv} {
         {editor.arg  {}  {editor to use}}
     }
     set usage "$argv0 \[options] filename ...\noptions:"
-    set opts [::cmdline::getoptions argv $options $usage]
+    if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] \
+            || ([lindex $argv 0] eq {})} {
+        puts -nonewline [::cmdline::usage $options $usage]
+        exit 1
+    }
 
     set editor $::env(EDITOR)
     if {[dict get $opts editor] ne {}} {
