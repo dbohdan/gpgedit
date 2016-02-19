@@ -48,6 +48,10 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
         if {!$readOnly} {
             encrypt $temporary $encrypted $passphrase
         }
+    } on error code {
+        puts "Error: $code"
+        puts "Press <enter> to delete the temporary file $temporary."
+        gets stdin
     } finally {
         file delete $temporary
     }
