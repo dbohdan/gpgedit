@@ -20,6 +20,10 @@ proc ::gpgedit::encrypt {in out passphrase} {
 }
 
 proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
+    # Return code and result.
+    set code ok
+    set result {}
+
     puts Passphrase:
 
     if {$::tcl_platform(platform) eq {unix}} {
@@ -48,13 +52,16 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
         if {!$readOnly} {
             encrypt $temporary $encrypted $passphrase
         }
-    } on error code {
-        puts "Error: $code"
+    } on error message {
+        puts "Error: $message"
         puts "Press <enter> to delete the temporary file $temporary."
         gets stdin
+        set code error
+        set result $message
     } finally {
         file delete $temporary
     }
+    return -code $code $result
 }
 
 proc ::gpgedit::main {argv0 argv} {
@@ -92,10 +99,14 @@ proc ::gpgedit::main {argv0 argv} {
         set t [clock seconds]
     }
 
-    edit $filename $editor [dict get $opts ro]
-
-    if {($warn > 0) && ([clock seconds] - $t <= 1000 * $warn)} {
-        puts "Warning: the editor exited after less than $warn second(s)."
+    try {
+        edit $filename $editor [dict get $opts ro]
+    } on error _ {
+        # Do nothing.
+    } on ok _ {
+        if {($warn > 0) && ([clock seconds] - $t <= 1000 * $warn)} {
+            puts "Warning: the editor exited after less than $warn second(s)."
+        }
     }
 }
 
