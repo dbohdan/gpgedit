@@ -61,6 +61,8 @@ proc ::gpgedit::main {argv0 argv} {
     set options {
         {editor.arg  {}  {editor to use}}
         {ro              {read-only mode -- all changes will be lost}}
+        {warn.arg    0   {warn if the editor exits after less than X\
+                          seconds}}
     }
     set usage "$argv0 \[options] filename ...\noptions:"
     if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] \
@@ -69,12 +71,32 @@ proc ::gpgedit::main {argv0 argv} {
         exit 1
     }
 
+    # The argument -editor.
     if {[dict get $opts editor] ne {}} {
         set editor [dict get $opts editor]
     } else {
         set editor $::env(EDITOR)
     }
+
+    # The argument -warn.
+    set warn [dict get $opts warn]
+    if {![string is double -strict $warn]} {
+        puts "Error: the argument to -warn must be a number."
+        exit 1
+    }
+    if {$warn < 0} {
+        puts "Error: the argument to -warn can't be negative."
+        exit 1
+    }
+    if {$warn > 0} {
+        set t [clock seconds]
+    }
+
     edit $filename $editor [dict get $opts ro]
+
+    if {($warn > 0) && ([clock seconds] - $t <= 1000 * $warn)} {
+        puts "Warning: the editor exited after less than $warn second(s)."
+    }
 }
 
 # If this is the main script...
