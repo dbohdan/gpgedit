@@ -104,7 +104,7 @@ proc ::gpgedit::main {argv0 argv} {
     } on error _ {
         # Do nothing.
     } on ok _ {
-        if {($warn > 0) && ([clock seconds] - $t <= 1000 * $warn)} {
+        if {($warn > 0) && ([clock seconds] - $t <= $warn)} {
             puts "Warning: the editor exited after less than $warn second(s)."
         }
     }
