@@ -1,4 +1,6 @@
 #!/usr/bin/env tclsh
+# Copyright (C) 2016 dbohdan
+# License: MIT
 package require Tcl 8.6
 package require cmdline
 package require fileutil
