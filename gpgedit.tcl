@@ -62,7 +62,9 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         set extension [file extension $rootname]
         close [file tempfile temporary $extension]
 
-        file attributes $temporary -permissions 0600
+        if {$::tcl_platform(platform) eq {unix}} {
+            file attributes $temporary -permissions 0600
+        }
         if {[file exists $encrypted]} {
             decrypt $encrypted $temporary $passphrase
         }
