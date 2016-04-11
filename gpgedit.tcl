@@ -19,20 +19,36 @@ proc ::gpgedit::encrypt {in out passphrase} {
     exec {*}$commandPrefix --symmetric --armor -o $out $in << $passphrase
 }
 
-proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
-    # Return code and result.
-    set code ok
-    set result {}
-
-    puts Passphrase:
+# Read a line from stdin without echo and return it.
+proc ::gpgedit::input prompt {
+    puts $prompt
 
     if {$::tcl_platform(platform) eq {unix}} {
         set oldMode [exec stty -g <@ stdin]
         exec stty -echo <@ stdin
     }
-    gets stdin passphrase
+    gets stdin input
     if {$::tcl_platform(platform) eq {unix}} {
         exec stty {*}$oldMode <@ stdin
+    }
+
+    return $input
+}
+
+# Ask the user for a passphrase. Decrypt the file $encrypted to a temporary
+# file with the passphrase and open it in the editor $editor. Once the editor
+# exits unless $readOnly is true encrypt the updated content of the temporary
+# file and save the it in $encrypted. If $changePassphrase is true, ask the user
+# for two passphrases; decrypt the file with the first passphrase and encrypt it
+# with the second.
+proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
+    # Return code and result.
+    set code ok
+    set result {}
+
+    set passphrase [input Passphrase:]
+    if {$changePassphrase} {
+        set newPassphrase [input {New passphrase:}]
     }
 
     try {
@@ -50,6 +66,9 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
         }
         exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
         if {!$readOnly} {
+            if {$changePassphrase} {
+                set passphrase $newPassphrase
+            }
             encrypt $temporary $encrypted $passphrase
         }
     } on error message {
@@ -66,8 +85,9 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0}} {
 
 proc ::gpgedit::main {argv0 argv} {
     set options {
-        {editor.arg  {}  {editor to use}}
-        {ro              {read-only mode -- all changes will be lost}}
+        {editor.arg  {}  {the editor to use}}
+        {ro              {read-only mode -- all changes will be discarded}}
+        {u               {change the passphrase for the file}}
         {warn.arg    0   {warn if the editor exits after less than X\
                           seconds}}
     }
@@ -78,14 +98,14 @@ proc ::gpgedit::main {argv0 argv} {
         exit 1
     }
 
-    # The argument -editor.
+    # Process the argument -editor.
     if {[dict get $opts editor] ne {}} {
         set editor [dict get $opts editor]
     } else {
         set editor $::env(EDITOR)
     }
 
-    # The argument -warn.
+    # Process the argument -warn.
     set warn [dict get $opts warn]
     if {![string is double -strict $warn]} {
         puts "Error: the argument to -warn must be a number."
@@ -100,7 +120,7 @@ proc ::gpgedit::main {argv0 argv} {
     }
 
     try {
-        edit $filename $editor [dict get $opts ro]
+        edit $filename $editor [dict get $opts ro] [dict get $opts u]
     } on error _ {
         # Do nothing.
     } on ok _ {
