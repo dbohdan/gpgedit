@@ -23,7 +23,7 @@ proc ::gpgedit::encrypt {in out passphrase} {
 
 # Read a line from stdin without echo and return it.
 proc ::gpgedit::input prompt {
-    puts $prompt
+    puts -nonewline $prompt
 
     if {$::tcl_platform(platform) eq {unix}} {
         set oldMode [exec stty -g <@ stdin]
@@ -44,13 +44,15 @@ proc ::gpgedit::input prompt {
 # for two passphrases; decrypt the file with the first passphrase and encrypt it
 # with the second.
 proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
+    chan configure stdout -buffering none
+
     # Return code and result.
     set code ok
     set result {}
 
-    set passphrase [input Passphrase:]
+    set passphrase [input {Passphrase: }]
     if {$changePassphrase} {
-        set newPassphrase [input {New passphrase:}]
+        set newPassphrase [input {New passphrase: }]
     }
 
     try {
