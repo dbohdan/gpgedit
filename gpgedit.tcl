@@ -44,6 +44,7 @@ proc ::gpgedit::input prompt {
 # for two passphrases; decrypt the file with the first passphrase and encrypt it
 # with the second.
 proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
+    set buffering [chan configure stdout -buffering]
     chan configure stdout -buffering none
 
     # Return code and result.
@@ -84,6 +85,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         set code error
         set result $message
     } finally {
+        chan configure stdout -buffering $buffering
         file delete $temporary
     }
     return -code $code $result
