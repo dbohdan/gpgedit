@@ -6,6 +6,8 @@ package require cmdline
 package require fileutil
 
 namespace eval ::gpgedit {
+    variable version 0.1.0
+
     variable gpgPath gpg2
     variable commandPrefix [list -ignorestderr -- \
             $gpgPath --batch --yes --passphrase-fd 0]
@@ -96,13 +98,25 @@ proc ::gpgedit::main {argv0 argv} {
         {editor.arg  {}  {the editor to use}}
         {ro              {read-only mode -- all changes will be discarded}}
         {u               {change the passphrase for the file}}
+        {v               {report the program version and exit}}
         {warn.arg    0   {warn if the editor exits after less than X\
                           seconds}}
     }
+
     set usage "$argv0 \[options] filename ...\noptions:"
     if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] \
             || ([set filename [lindex $argv 0]] eq {})} {
-        puts -nonewline [::cmdline::usage $options $usage]
+        if {[info exists opts] && [dict get $opts v]} {
+            puts $::gpgedit::version
+            exit 0
+        } else {
+            puts -nonewline [::cmdline::usage $options $usage]
+            exit 1
+        }
+    }
+
+    if {[dict get $opts v]} {
+        puts "Error: can't use -v with a filename."
         exit 1
     }
 
