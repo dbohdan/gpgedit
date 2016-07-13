@@ -53,12 +53,25 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
     set code ok
     set result {}
 
-    set passphrase [input {Passphrase: }]
-    if {$changePassphrase} {
-        set newPassphrase [input {New passphrase: }]
-    }
-
     try {
+        if {$readOnly && ![file exists $encrypted]} {
+            error "\"$encrypted\" doesn't exist;\
+                    won't attempt to create it in read-only mode"
+        }
+        if {![file readable $encrypted]} {
+            error "can't read from file \"$encrypted\""
+        }
+        # Try to prevent situations when the user loses work or has to recover
+        # it from the temporary file.
+        if {!$readOnly && ![file writable $encrypted]} {
+            error "can't write to file \"$encrypted\""
+        }
+
+        set passphrase [input {Passphrase: }]
+        if {$changePassphrase} {
+            set newPassphrase [input {New passphrase: }]
+        }
+
         if {[file extension $encrypted] in {.asc .gpg}} {
             set rootname [file rootname $encrypted]
         } else {
@@ -81,7 +94,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
             encrypt $temporary $encrypted $passphrase
         }
     } on error message {
-        puts "Error: $message"
+        puts "Error: $message."
         puts "Press <enter> to delete the temporary file $temporary."
         gets stdin
         set code error
