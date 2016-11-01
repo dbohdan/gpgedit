@@ -2,7 +2,7 @@
 
 `gpgedit` asks for a passphrase, uses it to decrypt the contents of a file encrypted with GPG2 symmetric encryption to a temporary file and runs an editor program on the temporary file (`$EDITOR` by default but it can be, e.g., LibreOffice). Once the editor exits it has GPG2 put the contents of the temporary file in the original file encrypted with the original passphrase and deletes the temporary file. In other words, it implements [a](https://tcl.wiki/39218) "[with](https://www.python.org/dev/peps/pep-0343/)" [pattern](https://clojuredocs.org/clojure.core/with-open).
 
-`gpgedit` is pre-alpha software.
+`gpgedit` is alpha software.
 
 # Usage
 
