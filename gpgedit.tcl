@@ -15,12 +15,14 @@ namespace eval ::gpgedit {
 
 proc ::gpgedit::decrypt {in out passphrase} {
     variable commandPrefix
-    exec {*}$commandPrefix --decrypt -o $out $in << $passphrase
+    exec {*}$commandPrefix --decrypt \
+            -o $out $in << $passphrase
 }
 
 proc ::gpgedit::encrypt {in out passphrase} {
     variable commandPrefix
-    exec {*}$commandPrefix --symmetric --armor -o $out $in << $passphrase
+    exec {*}$commandPrefix --symmetric --cipher-algo AES256 --armor \
+            -o $out $in << $passphrase
 }
 
 # Read a line from stdin without echo and return it.
