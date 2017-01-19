@@ -6,7 +6,7 @@ package require cmdline
 package require fileutil
 
 namespace eval ::gpgedit {
-    variable version 0.1.0
+    variable version 0.1.1
 
     variable gpgPath gpg2
     variable commandPrefix [list -ignorestderr -- \
@@ -21,7 +21,7 @@ proc ::gpgedit::decrypt {in out passphrase} {
 
 proc ::gpgedit::encrypt {in out passphrase} {
     variable commandPrefix
-    exec {*}$commandPrefix --symmetric --cipher-algo AES256 --armor \
+    exec {*}$commandPrefix --symmetric --armor --cipher-algo AES256 \
             -o $out $in << $passphrase
 }
 
@@ -56,17 +56,20 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
     set result {}
 
     try {
-        if {$readOnly && ![file exists $encrypted]} {
-            error "\"$encrypted\" doesn't exist;\
-                    won't attempt to create it in read-only mode"
-        }
-        if {![file readable $encrypted]} {
-            error "can't read from file \"$encrypted\""
-        }
-        # Try to prevent situations when the user loses work or has to recover
-        # it from the temporary file.
-        if {!$readOnly && ![file writable $encrypted]} {
-            error "can't write to file \"$encrypted\""
+        if {[file exists $encrypted]} {
+            if {![file readable $encrypted]} {
+                error "can't read from file \"$encrypted\""
+            }
+            # Try to prevent situations when the user loses work or has to
+            # recover it from the temporary file.
+            if {!$readOnly && ![file writable $encrypted]} {
+                error "can't write to file \"$encrypted\""
+            }
+        } else {
+            if {$readOnly} {
+                error "\"$encrypted\" doesn't exist;\
+                        won't attempt to create it in read-only mode"
+            }
         }
 
         set passphrase [input {Passphrase: }]
