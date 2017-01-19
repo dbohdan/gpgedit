@@ -34,10 +34,16 @@ sudo apt-get install tcl8.6 tcllib gnupg2
 sudo dnf install tcl tcllib gpg2
 ```
 
-### FreeBSD
+## FreeBSD
 
 ```shell
 sudo pkg install tcl86 tcllib gnupg
+```
+
+## openSUSE Tumbleweed
+
+```shell
+sudo zypper in tcl tcllib gpg2
 ```
 
 ## OS X
@@ -53,11 +59,10 @@ sudo port install tcllib gpg2
 
 # Security and other considerations
 
-The passphrase is kept in the memory of the program's Tcl process in plain text while the file is edited. The password can be extracted from the process's memory or the swap partition/file if it is swapped out. The decrypted contents of the file is stored in the default temporary directory (e.g., `/tmp`) where it can be accessed at least by other programs run by the same user while it is being edited. If your temporary directory is stored on disk and isn't encrypted the contents of the deleted temporary file could be restored.
+The passphrase is kept in the memory of the program's Tcl process in plain text while the file is edited. The passphrase can be extracted from the process's memory or the swap partition/file if it is swapped out. The decrypted contents of the file is stored in the default temporary directory (e.g., `/tmp`) where it can be accessed at minimum by other programs run by the same user while it is being edited. If your temporary directory is stored on disk and isn't encrypted the contents of the deleted temporary file could be recovered.
 
 `gpgedit` doesn't work with multi-document editors.
 
 # License
 
 MIT.
-
