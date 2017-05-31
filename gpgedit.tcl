@@ -3,10 +3,9 @@
 # License: MIT
 package require Tcl 8.6
 package require cmdline
-package require fileutil
 
 namespace eval ::gpgedit {
-    variable version 0.1.1
+    variable version 0.1.2
 
     variable gpgPath gpg2
     variable commandPrefix [list -ignorestderr -- \
@@ -77,11 +76,13 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
             set newPassphrase [input {New passphrase: }]
         }
 
-        if {[file extension $encrypted] in {.asc .gpg}} {
-            set rootname [file rootname $encrypted]
-        } else {
-            set rootname $encrypted
-        }
+        set rootname [
+            if {[file extension $encrypted] in {.asc .gpg}} {
+                file rootname $encrypted
+            } else {
+                set encrypted
+            }
+        ]
         set extension [file extension $rootname]
         close [file tempfile temporary $extension]
 
@@ -91,7 +92,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         if {[file exists $encrypted]} {
             decrypt $encrypted $temporary $passphrase
         }
-        exec $editor $temporary <@ stdin >@ stdout 2>@ stderr
+        exec {*}$editor $temporary <@ stdin >@ stdout 2>@ stderr
         if {!$readOnly} {
             if {$changePassphrase} {
                 set passphrase $newPassphrase
@@ -139,11 +140,17 @@ proc ::gpgedit::main {argv0 argv} {
     }
 
     # Process the argument -editor.
-    if {[dict get $opts editor] ne {}} {
-        set editor [dict get $opts editor]
-    } else {
-        set editor $::env(EDITOR)
-    }
+    set editor [
+        if {[dict get $opts editor] ne {}} {
+            dict get $opts editor
+        } elseif {[info exists ::env(VISUAL)]} {
+            set ::env(VISUAL)
+        } elseif {[info exists ::env(EDITOR)]} {
+            set ::env(EDITOR)
+        } else {
+            lindex vi
+        }
+    ]
 
     # Process the argument -warn.
     set warn [dict get $opts warn]
