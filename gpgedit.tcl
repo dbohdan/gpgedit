@@ -1,5 +1,5 @@
 #!/usr/bin/env tclsh
-# Copyright (C) 2016 dbohdan
+# Copyright (C) 2016, 2017, 2019 D. Bohdan
 # License: MIT
 package require Tcl 8.6
 package require cmdline
@@ -8,20 +8,32 @@ namespace eval ::gpgedit {
     variable version 0.1.2
 
     variable gpgPath gpg2
-    variable commandPrefix [list -ignorestderr -- \
-            $gpgPath --batch --yes --passphrase-fd 0]
+    variable commandPrefix [list \
+        -ignorestderr \
+        -- \
+        $gpgPath \
+        --batch \
+        --yes \
+        --passphrase-fd 0 \
+    ]
 }
 
 proc ::gpgedit::decrypt {in out passphrase} {
     variable commandPrefix
     exec {*}$commandPrefix --decrypt \
-            -o $out $in << $passphrase
+                           -o $out \
+                           $in \
+         << $passphrase
 }
 
 proc ::gpgedit::encrypt {in out passphrase} {
     variable commandPrefix
-    exec {*}$commandPrefix --symmetric --armor --cipher-algo AES256 \
-            -o $out $in << $passphrase
+    exec {*}$commandPrefix --symmetric \
+                           --armor \
+                           --cipher-algo AES256 \
+                           -o $out \
+                           $in \
+         << $passphrase
 }
 
 # Read a line from stdin without echo and return it.
@@ -32,7 +44,9 @@ proc ::gpgedit::input prompt {
         set oldMode [exec stty -g <@ stdin]
         exec stty -echo <@ stdin
     }
+
     gets stdin input
+
     if {$::tcl_platform(platform) eq {unix}} {
         exec stty {*}$oldMode <@ stdin
     }
@@ -50,7 +64,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
     set buffering [chan configure stdout -buffering]
     chan configure stdout -buffering none
 
-    # Return code and result.
+    # Command return code and result.
     set code ok
     set result {}
 
@@ -59,6 +73,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
             if {![file readable $encrypted]} {
                 error "can't read from file \"$encrypted\""
             }
+
             # Try to prevent situations when the user loses work or has to
             # recover it from the temporary file.
             if {!$readOnly && ![file writable $encrypted]} {
@@ -67,7 +82,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         } else {
             if {$readOnly} {
                 error "\"$encrypted\" doesn't exist;\
-                        won't attempt to create it in read-only mode"
+                       won't attempt to create it in read-only mode"
             }
         }
 
@@ -89,10 +104,13 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         if {$::tcl_platform(platform) eq {unix}} {
             file attributes $temporary -permissions 0600
         }
+
         if {[file exists $encrypted]} {
             decrypt $encrypted $temporary $passphrase
         }
+
         exec {*}$editor $temporary <@ stdin >@ stdout 2>@ stderr
+
         if {!$readOnly} {
             if {$changePassphrase} {
                 set passphrase $newPassphrase
@@ -102,13 +120,16 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
     } on error message {
         puts "Error: $message."
         puts "Press <enter> to delete the temporary file $temporary."
+
         gets stdin
+
         set code error
         set result $message
     } finally {
         chan configure stdout -buffering $buffering
         file delete $temporary
     }
+
     return -code $code $result
 }
 
@@ -123,8 +144,10 @@ proc ::gpgedit::main {argv0 argv} {
     }
 
     set usage "$argv0 \[options] filename ...\noptions:"
-    if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] \
-            || ([set filename [lindex $argv 0]] eq {})} {
+
+    if {[catch {set opts [::cmdline::getoptions argv $options $usage]}] ||
+        [set filename [lindex $argv 0]] eq {}} {
+
         if {[info exists opts] && [dict get $opts v]} {
             puts $::gpgedit::version
             exit 0
