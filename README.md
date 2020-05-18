@@ -2,7 +2,7 @@
 
 `gpgedit` asks for a passphrase, uses it to decrypt the contents of a file encrypted with GPG2 symmetric encryption to a temporary file and runs an editor program on the temporary file (`$EDITOR` by default but it can be, e.g., LibreOffice). Once the editor exits it has GPG2 put the contents of the temporary file in the original file encrypted with the original passphrase and deletes the temporary file. In other words, it implements [a](https://wiki.tcl-lang.org/39218) "[with](https://www.python.org/dev/peps/pep-0343/)" [pattern](https://clojuredocs.org/clojure.core/with-open).
 
-`gpgedit` is alpha software.
+`gpgedit` is beta-quality software.
 
 # Usage
 
@@ -20,12 +20,12 @@ options:
 
 # Dependencies
 
-Tcl 8.6.x, Tcllib and GPG2.
+Tcl 8.6.x, Tcllib, and GPG2.
 
 ## Debian/Ubuntu
 
 ```shell
-sudo apt-get install tcl8.6 tcllib gnupg2
+sudo apt install tcl8.6 tcllib gnupg2
 ```
 
 ## Fedora/RHEL
@@ -46,7 +46,7 @@ sudo pkg install tcl86 tcllib gnupg
 sudo zypper in tcl tcllib gpg2
 ```
 
-## OS X
+## macOS
 
 ```shell
 sudo brew install tcl-tk gnupg2
