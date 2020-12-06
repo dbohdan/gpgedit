@@ -1,6 +1,7 @@
 #!/usr/bin/env tclsh
-# Copyright (C) 2016, 2017, 2019 D. Bohdan
+# Copyright (C) 2016, 2017, 2019, 2020 D. Bohdan
 # License: MIT
+
 package require Tcl 8.6
 package require cmdline
 
@@ -79,11 +80,9 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
             if {!$readOnly && ![file writable $encrypted]} {
                 error "can't write to file \"$encrypted\""
             }
-        } else {
-            if {$readOnly} {
-                error "\"$encrypted\" doesn't exist;\
-                       won't attempt to create it in read-only mode"
-            }
+        } elseif {$readOnly} {
+            error "\"$encrypted\" doesn't exist;\
+                   won't attempt to create it in read-only mode"
         }
 
         set passphrase [input {Passphrase: }]
