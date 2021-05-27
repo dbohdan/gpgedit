@@ -1,5 +1,5 @@
 #!/usr/bin/env tclsh
-# Copyright (C) 2016, 2017, 2019, 2020 D. Bohdan
+# Copyright (c) 2016-2017, 2019-2021 D. Bohdan
 # License: MIT
 
 package require Tcl 8.6
