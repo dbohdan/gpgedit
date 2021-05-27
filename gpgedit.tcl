@@ -2,7 +2,7 @@
 # Copyright (c) 2016-2017, 2019-2021 D. Bohdan
 # License: MIT
 
-package require Tcl 8.6
+package require Tcl 8.6-10
 package require cmdline
 
 namespace eval ::gpgedit {
