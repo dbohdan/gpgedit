@@ -49,6 +49,7 @@ proc ::gpgedit::input prompt {
     gets stdin input
 
     if {$::tcl_platform(platform) eq {unix}} {
+        puts {}
         exec stty {*}$oldMode <@ stdin
     }
 
