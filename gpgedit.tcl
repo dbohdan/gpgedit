@@ -1,12 +1,12 @@
 #!/usr/bin/env tclsh
-# Copyright (c) 2016-2017, 2019-2021 D. Bohdan
+# Copyright (c) 2016-2017, 2019-2021, 2023 D. Bohdan
 # License: MIT
 
 package require Tcl 8.6-10
 package require cmdline
 
 namespace eval ::gpgedit {
-    variable version 0.1.2
+    variable version 0.1.3
 
     variable gpgPath gpg2
     variable commandPrefix [list \
@@ -100,8 +100,9 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         set extension [file extension $rootname]
         close [file tempfile temporary $extension]
 
-        if {$::tcl_platform(platform) eq {unix}} {
-            file attributes $temporary -permissions 0600
+        if {$::tcl_platform(platform) eq {unix}
+            && [file attributes $temporary -permissions] != 00600} {
+            error "wrong permissions on the temporary file."
         }
 
         if {[file exists $encrypted]} {
