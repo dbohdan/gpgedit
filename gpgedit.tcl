@@ -1,8 +1,8 @@
 #!/usr/bin/env tclsh
-# Copyright (c) 2016-2017, 2019-2021, 2023 D. Bohdan
+# Copyright (c) 2016-2017, 2019-2021, 2023-2024 D. Bohdan
 # License: MIT
 
-package require Tcl 8.6-10
+package require Tcl 8.6 9
 package require cmdline
 
 namespace eval ::gpgedit {
