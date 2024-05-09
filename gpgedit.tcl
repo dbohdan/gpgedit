@@ -102,7 +102,7 @@ proc ::gpgedit::edit {encrypted editor {readOnly 0} {changePassphrase 0}} {
         close [file tempfile temporary $extension]
 
         if {$::tcl_platform(platform) eq {unix}
-            && [file attributes $temporary -permissions] != 00600} {
+            && [file attributes $temporary -permissions] != 0o600} {
             error "wrong permissions on the temporary file."
         }
 
