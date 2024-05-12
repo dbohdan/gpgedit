@@ -28,7 +28,7 @@ Tcl 8.6.x, Tcllib, and GPG2.
 sudo apt install tcl8.6 tcllib gnupg2
 ```
 
-## Fedora/RHEL
+## Fedora
 
 ```shell
 sudo dnf install tcl tcllib gpg2
@@ -49,7 +49,7 @@ sudo zypper in tcl tcllib gpg2
 ## macOS
 
 ```shell
-sudo brew install tcl-tk gnupg2
+brew install tcl-tk gnupg2
 ```
 
 ```shell
