@@ -172,10 +172,7 @@ func cli() int {
 		return 2
 	}
 
-	start := 0
-	if *warn > 0 {
-		start = int(time.Now().Unix())
-	}
+	start := int(time.Now().Unix())
 
 	tempDir, err := edit(filename, editor, *readOnly, *changePassphrase)
 	if tempDir != "" {
