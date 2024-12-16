@@ -1,5 +1,7 @@
 # gpgedit
 
+**This project has been retired in favor of [age-edit](https://github.com/dbohdan/age-edit).**
+
 gpgedit is an editor wrapper for GPG2-encrypted files made primarily for Linux.
 
 How it works:
