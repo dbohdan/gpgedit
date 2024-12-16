@@ -1,6 +1,7 @@
 # gpgedit
 
-gpgedit is an editor wrapper for GPG2-encrypted files.
+gpgedit is an editor wrapper for GPG2-encrypted files made primarily for Linux.
+
 How it works:
 
 1. First, gpgedit asks for a passphrase.
@@ -27,6 +28,8 @@ gpgedit is beta-quality software.
 ### Runtime
 
 - GPG2
+- A temporary filesystem mounted on `/dev/shm/`.
+  It is present by default on Linux with glibc.
 
 ## Installation
 
@@ -51,9 +54,9 @@ Usage of gpgedit:
 ## Security and other considerations
 
 The passphrase is kept in the memory of the gpgedit process in plain text while the file is being edited.
-The passphrase can be extracted from the process's memory or swap if it is swapped out.
-The decrypted contents of the file is stored in the default temporary directory (e.g., `/tmp/`), where at minimum other programs run by the same user can access it.
-If your temporary directory is stored on disk and isn't encrypted, the contents of the deleted temporary file could be recovered.
+The passphrase can be extracted from the process's memory or from swap if it is swapped out.
+The decrypted contents of the file is stored on a temporary filesystem in RAM (`/dev/shm/${USER}-gpgedit`).
+Other programs run by the same user can access it there, and it can also be swapped out.
 
 gpgedit doesn't work with multi-document editors.
 

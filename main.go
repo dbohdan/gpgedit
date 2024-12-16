@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"path"
 	"strings"
 	"syscall"
@@ -16,9 +17,10 @@ import (
 const (
 	filePerm    = 0o600
 	tempDirPerm = 0o700
+	tempDirPrefix = "/dev/shm"
 
 	gpgPath = "gpg2"
-	version = "0.2.0"
+	version = "0.3.0"
 )
 
 type EncryptError struct {
@@ -86,7 +88,13 @@ func edit(encrypted, editor string, readOnly, changePassphrase bool) (tempDir st
 		}
 	}
 
-	tempDir, err = os.MkdirTemp("", "*")
+	currentUser, err := user.Current()
+	if err != nil {
+		return
+	}
+
+	tempDir = path.Join(tempDirPrefix, currentUser.Username+"-gpgedit")
+	err = os.MkdirAll(tempDir, tempDirPerm)
 	if err != nil {
 		return
 	}
